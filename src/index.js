@@ -1,0 +1,87 @@
+// src/index.js
+const express = require('express');
+const cors = require('cors');
+const app = express();
+// const userRoutes = require('./routes/userRoutes');
+const prisma = require('../prismaClient');
+const tableDataRoutes = require('./routes/tableDataRoutes');
+const activityDataRoutes = require('./routes/activityDataRoutes');
+const yearDataRoutes = require('./routes/yearDataRoutes');
+const activityRoutes = require('./routes/activityRoutes');
+app.use(express.json()); // For parsing application/json
+
+app.use(cors());
+// Use the routes
+// app.use('/api/users', userRoutes);
+app.use('/api/activityData', activityDataRoutes);
+app.use('/api/tabledata', tableDataRoutes);
+app.use('/api/yearData', yearDataRoutes);
+app.use('/api/activity', activityRoutes);
+
+app.get('/api/data', async (req, res) => {
+    try {
+        const activityData = await prisma.activityData.findMany({
+            include: {
+                year: true,
+                activity: true,
+                quarterlyType: true,
+            },
+        });
+
+        const result = {
+            Monthly: {},
+            Quarterly: {},
+            Yearly: {}
+        };
+
+        activityData.forEach(data => {
+            const year = data.year.year;
+            const month = data.month;
+            const name = data.activity.name;
+            const dueDate = data.dueDate.toISOString().split('T')[0]; // Format date to 'YYYY-MM-DD'
+
+            if (data.type === 'Monthly') {
+                if (!result.Monthly[name]) {
+                    result.Monthly[name] = {};
+                }
+                if (!result.Monthly[name][year]) {
+                    result.Monthly[name][year] = {};
+                }
+                if (!result.Monthly[name][year][month]) {
+                    result.Monthly[name][year][month] = [];
+                }
+                result.Monthly[name][year][month].push({ name: data.taskName, dueDate });
+            } else if (data.type === 'Quarterly') {
+                if (!result.Quarterly[name]) {
+                    result.Quarterly[name] = {};
+                }
+                if (!result.Quarterly[name][year]) {
+                    result.Quarterly[name][year] = {};
+                }
+                const quarter = data.quarterlyType.startMonth + '-' + data.quarterlyType.endMonth;
+                if (!result.Quarterly[name][year][quarter]) {
+                    result.Quarterly[name][year][quarter] = [];
+                }
+                result.Quarterly[name][year][quarter].push({ name: data.taskName, dueDate });
+            } else if (data.type === 'Yearly') {
+                if (!result.Yearly[name]) {
+                    result.Yearly[name] = {};
+                }
+                if (!result.Yearly[name][year]) {
+                    result.Yearly[name][year] = [];
+                }
+                result.Yearly[name][year].push({ name: data.taskName, dueDate });
+            }
+        });
+
+        res.json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});

@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum UserType{
+  Superadmin
+  Admin
+  User
+}
+enum SubscriptionType{
+  Paid 
+  Free
+}
+
+enum ActivityType {
+  Monthly
+  Quarterly
+  Yearly
+}
+enum MonthType {
+  January
+  February
+  March
+  April
+  May
+  June
+  July
+  August
+  September
+  October
+  November
+  December
+}
+
+model Year {
+  id           Int           @id @default(autoincrement())
+  year         Int           @unique
+  activityData ActivityData[]
+}
+
+model Activity {
+  id           Int           @id @default(autoincrement())
+  name         String
+  type         ActivityType
+  activityData ActivityData[] 
+}
+model QuarterlyType{
+  id           Int           @id @default(autoincrement())
+  startMonth   MonthType  
+  endMonth     MonthType  
+  activityData ActivityData[] 
+}
+model ActivityData {
+  id         Int       @id @default(autoincrement())
+  taskName       String
+  type       ActivityType
+  year       Year      @relation(fields: [yearId], references: [id])
+  yearId     Int
+  month      MonthType?
+  dueDate      DateTime
+  activity   Activity   @relation(fields: [activityId], references: [id])
+  activityId Int
+   quarterlyType  QuarterlyType?   @relation(fields: [quarterlyTypeId], references: [id])
+  quarterlyTypeId Int?
+ tableData TableData[]
+}
+
+model TableData {
+  id           Int           @id @default(autoincrement())
+  activityData ActivityData  @relation(fields: [activityId], references: [id])
+  activityId   Int
+  completed    Boolean       @default(false)
+  completedBy  String?
+  preferredDate DateTime?
+  user User[]
+}
+
+model User {
+  id               Int              @id @default(autoincrement())
+  name             String
+  email            String           @unique
+  password         String
+  userType         UserType
+  subscriptionType SubscriptionType
+  subscriptionAmount Int
+   tableData TableData  @relation(fields: [tableDataId], references: [id])
+  tableDataId   Int
+}
+
+model Link {
+  id             Int     @id @default(autoincrement())
+  link           String  @unique
+  linkownerName  String
+  linkreciever   String
+  data           Json
+}
