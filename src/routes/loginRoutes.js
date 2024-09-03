@@ -36,7 +36,14 @@ router.post('/', async (req, res) => {
             expiresIn: '1h',
         });
 
-        res.json({ token });
+        res.json({
+            success: true, token, user: {
+                name: user.name,
+                email: user.email,
+                userType: user.userType,
+                subscriptionType: user.subscriptionType
+            }
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });

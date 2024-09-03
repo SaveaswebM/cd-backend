@@ -12,7 +12,9 @@ router.post('/', async (req, res) => {
     if (!name || !email || !password || !userType || !subscriptionType || !subscriptionAmount) {
         return res.status(400).json({ error: 'All fields are required' });
     }
-
+    if (password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+    }
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await prisma.user.create({

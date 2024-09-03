@@ -6,13 +6,15 @@ const prisma = require('../../prismaClient');
 
 const router = express.Router();
 
-router.post('/reset-password', async (req, res) => {
+router.post('/', async (req, res) => {
     const { email, otp, newPassword } = req.body;
 
     if (!email || !otp || !newPassword) {
         return res.status(400).json({ error: 'Email, OTP, and new password are required' });
     }
-
+    if (newPassword.length < 8) {
+        return res.status(400).json({ error: 'New Password must be at least 8 characters long' });
+    }
     try {
         const user = await prisma.user.findUnique({ where: { email } });
 

@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-router.post('/request-otp', async (req, res) => {
+router.post('/', async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
