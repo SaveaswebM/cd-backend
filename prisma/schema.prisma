@@ -87,8 +87,8 @@ model TableData {
  month         MonthType?
  selectedActivityType  String
   data       String // Adjust this field as necessary to store your table data.
-  userId     Int
-  user       User   @relation(fields: [userId], references: [id])
+
+  user       User[]
 }
 
 model User {
@@ -99,7 +99,9 @@ model User {
   userType           UserType
   subscriptionType   SubscriptionType
   subscriptionAmount Int
-  tableData          TableData[]      // One-to-many relationship with TableData
+ tableDataId            Int?             // Add this field to refer to a specific TableData entry
+  tableData              TableData?       @relation(fields: [tableDataId], references: [id])
+ 
   otp                String?          // OTP field
   otpExpiration      DateTime?        // OTP expiration time
 }
