@@ -18,8 +18,10 @@ enum UserType{
   User
 }
 enum SubscriptionType{
-  Paid 
-  Free
+Free
+Standard
+Premium
+
 }
 
 enum ActivityType {
@@ -72,29 +74,33 @@ model ActivityData {
   activityId Int
    quarterlyType  QuarterlyType?   @relation(fields: [quarterlyTypeId], references: [id])
   quarterlyTypeId Int?
- tableData TableData[]
+
 }
 
 model TableData {
-  id           Int           @id @default(autoincrement())
-  activityData ActivityData  @relation(fields: [activityId], references: [id])
-  activityId   Int
-  completed    Boolean       @default(false)
-  completedBy  String?
-  preferredDate DateTime?
-  user User[]
+  id         Int    @id @default(autoincrement())
+ key         String?
+ companyName String?
+ activityName String?
+ year        Int?
+ month         MonthType?
+ selectedActivityType  String
+  data       String // Adjust this field as necessary to store your table data.
+  userId     Int
+  user       User   @relation(fields: [userId], references: [id])
 }
 
 model User {
-  id               Int              @id @default(autoincrement())
-  name             String
-  email            String           @unique
-  password         String
-  userType         UserType
-  subscriptionType SubscriptionType
+  id                 Int              @id @default(autoincrement())
+  name               String?
+  email              String           @unique
+  password           String?
+  userType           UserType
+  subscriptionType   SubscriptionType
   subscriptionAmount Int
-   tableData TableData  @relation(fields: [tableDataId], references: [id])
-  tableDataId   Int
+  tableData          TableData[]      // One-to-many relationship with TableData
+  otp                String?          // OTP field
+  otpExpiration      DateTime?        // OTP expiration time
 }
 
 model Link {

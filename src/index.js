@@ -8,6 +8,11 @@ const tableDataRoutes = require('./routes/tableDataRoutes');
 const activityDataRoutes = require('./routes/activityDataRoutes');
 const yearDataRoutes = require('./routes/yearDataRoutes');
 const activityRoutes = require('./routes/activityRoutes');
+const loginRoutes = require('./routes/loginRoutes');
+const registerRoutes = require('./routes/registerRoutes');
+// const forgotPasswordRoutes = require('./routes/forgotPasswordRoutes');
+const resetPasswordRoutes = require('./routes/resetPasswordRoutes');
+const otpRoutes = require('./routes/otpRoutes'); // Include OTP routes
 app.use(express.json()); // For parsing application/json
 
 app.use(cors());
@@ -17,6 +22,12 @@ app.use('/api/activityData', activityDataRoutes);
 app.use('/api/tabledata', tableDataRoutes);
 app.use('/api/yearData', yearDataRoutes);
 app.use('/api/activity', activityRoutes);
+app.use('/api/auth', loginRoutes);
+app.use('/api/register', registerRoutes);
+// app.use('/api/forgot-password', forgotPasswordRoutes);
+app.use('/api/reset-password', resetPasswordRoutes);
+app.use('/api/otp', otpRoutes); // Use OTP routes
+
 
 app.get('/api/data', async (req, res) => {
     try {
