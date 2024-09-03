@@ -17,6 +17,7 @@ enum UserType{
   Admin
   User
 }
+
 enum SubscriptionType{
 Free
 Standard
