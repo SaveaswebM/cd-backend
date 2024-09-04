@@ -13,6 +13,9 @@ const registerRoutes = require('./routes/registerRoutes');
 // const forgotPasswordRoutes = require('./routes/forgotPasswordRoutes');
 const resetPasswordRoutes = require('./routes/resetPasswordRoutes');
 const otpRoutes = require('./routes/otpRoutes'); // Include OTP routes
+const otpVerificationRoutes = require("./routes/otpVerificationRoutes");
+const passwordVerificationRoutes = require("./routes/passwordVerificationRoutes");
+
 app.use(express.json()); // For parsing application/json
 
 app.use(cors());
@@ -31,7 +34,8 @@ app.use('/api/register', registerRoutes);
 // app.use('/api/forgot-password', forgotPasswordRoutes);
 app.use('/api/reset-password', resetPasswordRoutes);
 app.use('/api/otp', otpRoutes); // Use OTP routes
-
+app.use("/api/verify-otp", otpVerificationRoutes);
+app.use("/api/verify-password", passwordVerificationRoutes);
 
 app.get("/api/data", async (req, res) => {
   try {
