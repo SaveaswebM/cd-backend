@@ -29,6 +29,7 @@ enum ActivityType {
   Monthly
   Quarterly
   Yearly
+  admin
 }
 enum MonthType {
   January
@@ -85,7 +86,7 @@ model TableData {
  activityName String?
  year        Int?
  month         MonthType?
- selectedActivityType  String
+ selectedActivityType  ActivityType
   data       String // Adjust this field as necessary to store your table data.
 
   user       User[]
