@@ -4,7 +4,7 @@ const tableDataController = require('../controllers/tableDataController');
 
 
 
-router.post("", (req, res) => {
+router.post("/", (req, res) => {
 
 });
 
