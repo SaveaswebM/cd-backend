@@ -7,56 +7,58 @@ const router = express.Router();
 router.post("/", async (req, res) => {
   const {
     link, // Link URL (should be unique)
-    linkownerName, // Name of the owner
-    linkrecieverName, // Name of the receiver
-    companyName, // Company name
-    activities, // Array of activities
     data // Additional JSON data (optional)
   } = req.body;
 
   // Ensure the required fields are provided
-  if (
-    !link ||
-    !linkownerName ||
-    !linkrecieverName ||
-    !companyName ||
-    !activities
-  ) {
+  if (!link) {
     return res.status(400).json({
-      error:
-        "Missing required fields: link, linkownerName, linkrecieverName, companyName, and activities are required."
+      error: "Missing required field: link is required."
     });
   }
 
   try {
-    // Create a new link entry using Prisma
-    const newLink = await prisma.link.create({
-      data: {
-        link,
-        linkownerName,
-        linkrecieverName,
-        companyName,
-        activities,
-        data: data || {} // Optional data, defaults to an empty object if not provided
-      }
+    // Check if the link already exists
+    const existingLink = await prisma.link.findUnique({
+      where: { link: link }
     });
 
-    // Return the newly created link entry
-    return res.status(201).json({
-      message: "Link created successfully",
-      link: newLink
-    });
+    if (existingLink) {
+      // If the link exists, update the data field
+      const updatedLink = await prisma.link.update({
+        where: { link: link },
+        data: { data: data || {} } // Update the 'data' field
+      });
+
+      return res.status(200).json({
+        message: "Link data updated successfully",
+        link: updatedLink
+      });
+    } else {
+      // If the link does not exist, create a new entry
+      const newLink = await prisma.link.create({
+        data: {
+          link,
+          data: data || {} // Optional data, defaults to an empty object if not provided
+        }
+      });
+
+      return res.status(201).json({
+        message: "Link created successfully",
+        link: newLink
+      });
+    }
   } catch (error) {
-    console.error("Error creating link:", error);
+    console.error("Error creating/updating link:", error);
     return res.status(500).json({
-      error: "An error occurred while creating the link."
+      error: "An error occurred while creating/updating the link."
     });
   }
 });
 
 // Get a Link by 'link' or search by other parameters
 router.get("/", async (req, res) => {
-  const { link, linkownerName, linkrecieverName, companyName } = req.query; // Query parameters from the request
+  const { link } = req.query; // Query parameters from the request
 
   try {
     // If `link` is provided, fetch the specific link
@@ -73,25 +75,6 @@ router.get("/", async (req, res) => {
 
       return res.status(200).json(linkData);
     }
-
-    // If `link` is not provided, search by the other fields
-    const links = await prisma.link.findMany({
-      where: {
-        linkownerName: linkownerName ? { contains: linkownerName } : undefined,
-        linkrecieverName: linkrecieverName
-          ? { contains: linkrecieverName }
-          : undefined,
-        companyName: companyName ? { contains: companyName } : undefined
-      }
-    });
-
-    if (links.length === 0) {
-      return res.status(404).json({
-        message: "No links found"
-      });
-    }
-
-    return res.status(200).json(links);
   } catch (error) {
     console.error("Error fetching links:", error);
     return res.status(500).json({
