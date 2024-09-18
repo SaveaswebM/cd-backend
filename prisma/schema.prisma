@@ -113,6 +113,6 @@ model Link {
   linkownerName  String
   linkrecieverName   String
   companyName    String
-  activities     String[] 
+  activities     Json
   data           Json
 }

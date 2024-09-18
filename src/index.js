@@ -15,7 +15,7 @@ const resetPasswordRoutes = require('./routes/resetPasswordRoutes');
 const otpRoutes = require('./routes/otpRoutes'); // Include OTP routes
 const otpVerificationRoutes = require("./routes/otpVerificationRoutes");
 const passwordVerificationRoutes = require("./routes/passwordVerificationRoutes");
-const tableDataUpdateRoutes = require("./routes/tableDataUpdateRoutes");
+const linkDataUpdateRoutes = require("./routes/linkDataUpdateRoutes");
 
 app.use(express.json()); // For parsing application/json
 
@@ -37,7 +37,7 @@ app.use('/api/reset-password', resetPasswordRoutes);
 app.use('/api/otp', otpRoutes); // Use OTP routes
 app.use("/api/verify-otp", otpVerificationRoutes);
 app.use("/api/verify-password", passwordVerificationRoutes);
-app.use("/api/table-data", tableDataUpdateRoutes);
+app.use("/api/link-data", linkDataUpdateRoutes);
 
 
 app.get("/api/data", async (req, res) => {
