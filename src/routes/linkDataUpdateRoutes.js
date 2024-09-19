@@ -7,7 +7,7 @@ const router = express.Router();
 router.post("/", async (req, res) => {
   const {
     link, // Link URL (should be unique)
-    data // Additional JSON data (optional)
+    data // The incoming data object
   } = req.body;
 
   // Ensure the required fields are provided
@@ -24,10 +24,24 @@ router.post("/", async (req, res) => {
     });
 
     if (existingLink) {
-      // If the link exists, update the data field
+      // If the link exists, merge the new data with the existing data
+      const updatedData = { ...existingLink.data };
+
+      // Iterate over incoming data keys to update or add them
+      Object.keys(data).forEach((key) => {
+        if (updatedData[key]) {
+          // Key exists, merge arrays
+          updatedData[key] = [...updatedData[key], ...data[key]];
+        } else {
+          // Key doesn't exist, add new entry
+          updatedData[key] = data[key];
+        }
+      });
+
+      // Update the link with the merged data
       const updatedLink = await prisma.link.update({
         where: { link: link },
-        data: { data: data || {} } // Update the 'data' field
+        data: { data: updatedData }
       });
 
       return res.status(200).json({
@@ -55,6 +69,7 @@ router.post("/", async (req, res) => {
     });
   }
 });
+
 
 // Get a Link by 'link' or search by other parameters
 router.get("/", async (req, res) => {
