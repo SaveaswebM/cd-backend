@@ -24,21 +24,16 @@ router.post("/", async (req, res) => {
     });
 
     if (existingLink) {
-      // If the link exists, merge the new data with the existing data
+      // If the link exists, replace the existing data for each key with the new data
       const updatedData = { ...existingLink.data };
 
       // Iterate over incoming data keys to update or add them
       Object.keys(data).forEach((key) => {
-        if (updatedData[key]) {
-          // Key exists, merge arrays
-          updatedData[key] = [...updatedData[key], ...data[key]];
-        } else {
-          // Key doesn't exist, add new entry
-          updatedData[key] = data[key];
-        }
+        // Replace existing data or add new key-value pair
+        updatedData[key] = data[key];
       });
 
-      // Update the link with the merged data
+      // Update the link with the new data
       const updatedLink = await prisma.link.update({
         where: { link: link },
         data: { data: updatedData }
@@ -69,6 +64,7 @@ router.post("/", async (req, res) => {
     });
   }
 });
+
 
 
 // Get a Link by 'link' or search by other parameters
