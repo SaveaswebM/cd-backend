@@ -110,8 +110,7 @@ model User {
 model Link {
   id             Int     @id @default(autoincrement())
   link           String  @unique
-  
- recievers       Json
-
+  owner          String?
+ recievers       Json?
   data           Json
 }

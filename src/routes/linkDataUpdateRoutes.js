@@ -7,6 +7,10 @@ const router = express.Router();
 router.post("/", async (req, res) => {
   const {
     link, // Link URL (should be unique)
+    owner,
+    companyName,
+    activityName,
+    employeeName,
     data // The incoming data object
   } = req.body;
 
@@ -14,6 +18,11 @@ router.post("/", async (req, res) => {
   if (!link) {
     return res.status(400).json({
       error: "Missing required field: link is required."
+    });
+  }
+  if (!companyName || !activityName || !employeeName) {
+    return res.status(400).json({
+      error: "Missing activity data"
     });
   }
 
@@ -24,30 +33,60 @@ router.post("/", async (req, res) => {
     });
 
     if (existingLink) {
-      // If the link exists, replace the existing data for each key with the new data
-      const updatedData = { ...existingLink.data };
+      // If the link exists, fetch and modify recievers
+      let recievers = existingLink.recievers || {};
 
-      // Iterate over incoming data keys to update or add them
-      Object.keys(data).forEach((key) => {
-        // Replace existing data or add new key-value pair
-        updatedData[key] = data[key];
-      });
+      // Check if the employeeName exists
+      if (!recievers[employeeName]) {
+        // If employee doesn't exist, create new structure for the employee
+        recievers[employeeName] = {
+          [companyName]: [activityName] // Add company and activityName
+        };
+      } else {
+        // Employee exists, check if the companyName exists
+        if (!recievers[employeeName][companyName]) {
+          // Company doesn't exist, create the company and add the activityName
+          recievers[employeeName][companyName] = [activityName];
+        } else {
+          // Company exists, check if the activityName exists
+          if (!recievers[employeeName][companyName].includes(activityName)) {
+            // Add the activityName to the company's activity list
+            recievers[employeeName][companyName].push(activityName);
+          } else {
+            return res.status(200).json({
+              message: `Activity '${activityName}' already exists for employee '${employeeName}' under company '${companyName}'`
+            });
+          }
+        }
+      }
 
-      // Update the link with the new data
+      // Update the link's recievers and other data
+      const updatedData = { ...existingLink.data, ...data }; // Merge the new data into the existing data
       const updatedLink = await prisma.link.update({
         where: { link: link },
-        data: { data: updatedData }
+        data: {
+          recievers: recievers,
+          data: updatedData // Update the data as well
+        }
       });
 
       return res.status(200).json({
-        message: "Link data updated successfully",
+        message: "Link data and access modified successfully",
         link: updatedLink
       });
     } else {
       // If the link does not exist, create a new entry
+      const newRecievers = {
+        [employeeName]: {
+          [companyName]: [activityName]
+        }
+      };
+
       const newLink = await prisma.link.create({
         data: {
           link,
+          owner,
+          recievers: newRecievers,
           data: data || {} // Optional data, defaults to an empty object if not provided
         }
       });
@@ -66,6 +105,69 @@ router.post("/", async (req, res) => {
 });
 
 
+router.post("/modify-access", async (req, res) => {
+  const { link, companyName, activityName, employeeName } = req.body;
+
+  try {
+    if (!link) {
+      return res.status(400).json({
+        message: "Link is required"
+      });
+    }
+
+    const linkData = await prisma.link.findUnique({
+      where: { link: link }
+    });
+
+    if (!linkData) {
+      return res.status(404).json({
+        message: "Link not found"
+      });
+    }
+
+    let recievers = linkData.recievers || {};
+
+    // Check if employeeName exists
+    if (!recievers[employeeName]) {
+      return res.status(404).json({
+        message: `Employee ${employeeName} not found`
+      });
+    }
+
+    // Check if companyName exists for the employee
+    if (!recievers[employeeName][companyName]) {
+      // Add companyName with the activityName if it doesn't exist
+      recievers[employeeName][companyName] = [activityName];
+    } else {
+      // Check if the activityName already exists in the companyName's list
+      if (!recievers[employeeName][companyName].includes(activityName)) {
+        // Add the activityName to the companyName's list
+        recievers[employeeName][companyName].push(activityName);
+      } else {
+        return res.status(200).json({
+          message: `Activity ${activityName} already exists for company ${companyName}`
+        });
+      }
+    }
+
+    // Update the recievers in the database
+    await prisma.link.update({
+      where: { link: link },
+      data: { recievers: recievers }
+    });
+
+    res.status(200).json({
+      message: "Access modified successfully",
+      updatedRecievers: recievers
+    });
+
+  } catch (error) {
+    console.error("Error modifying access:", error);
+    return res.status(500).json({
+      error: "An error occurred while modifying access"
+    });
+  }
+});
 
 // Get a Link by 'link' or search by other parameters
 router.get("/", async (req, res) => {
@@ -90,6 +192,33 @@ router.get("/", async (req, res) => {
     console.error("Error fetching links:", error);
     return res.status(500).json({
       error: "An error occurred while fetching links"
+    });
+  }
+});
+
+router.get("/employee-list", async (req, res) => {
+  const { link } = req.query; // Use req.query for GET request
+  try {
+    if (link) {
+      const linkData = await prisma.link.findUnique({
+        where: { link: link }
+      });
+
+      if (!linkData) {
+        return res.status(404).json({
+          message: "Link not found"
+        });
+      }
+
+      res.status(200).json(linkData.recievers); // Return recievers field
+    } else {
+      res.status(400).json({
+        message: "Link is required"
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "An error occurred while fetching the link data"
     });
   }
 });
