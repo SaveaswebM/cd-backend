@@ -52,11 +52,12 @@ router.post("/", async (req, res) => {
           if (!recievers[employeeName][companyName].includes(activityName)) {
             // Add the activityName to the company's activity list
             recievers[employeeName][companyName].push(activityName);
-          } else {
-            return res.status(200).json({
-              message: `Activity '${activityName}' already exists for employee '${employeeName}' under company '${companyName}'`
-            });
           }
+          //  else {
+          //   return res.status(200).json({
+          //     message: `Activity '${activityName}' already exists for employee '${employeeName}' under company '${companyName}'`
+          //   });
+          // }
         }
       }
 
