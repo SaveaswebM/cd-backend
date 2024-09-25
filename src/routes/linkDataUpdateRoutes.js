@@ -298,6 +298,48 @@ router.get("/", async (req, res) => {
     });
   }
 });
+router.get("/access-list", async (req, res) => {
+  const { link, employeeName } = req.query; // Using query params, not req.params for GET
+
+  if (!link || !employeeName) {
+    return res.status(400).json({
+      error: "Missing required fields: link and employeeName are required."
+    });
+  }
+
+  try {
+    // Find the link in the database
+    const linkData = await prisma.link.findUnique({
+      where: { link: link }
+    });
+
+    if (!linkData) {
+      return res.status(404).json({
+        error: "Link not found."
+      });
+    }
+
+    const recieverData = linkData.recievers || {};
+
+    // Check if the employeeName exists in recievers
+    if (recieverData[employeeName]) {
+      return res.status(200).json({
+        employee: employeeName,
+        companies: recieverData[employeeName] // Return all companies and activities for this employee
+      });
+    } else {
+      return res.status(404).json({
+        error: `Employee '${employeeName}' not found.`
+      });
+    }
+
+  } catch (error) {
+    console.error("Error fetching link data:", error);
+    return res.status(500).json({
+      error: "An error occurred while fetching the data."
+    });
+  }
+});
 
 router.get("/employee-list", async (req, res) => {
   const { link } = req.query; // Use req.query for GET request
