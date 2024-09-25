@@ -4,17 +4,118 @@ const prisma = require("../../prismaClient");
 
 const router = express.Router();
 
+// router.post("/", async (req, res) => {
+//   const {
+//     link, // Link URL (should be unique)
+//     owner,
+//     companyName,
+//     activityName,
+//     employeeName,
+//     data // The incoming data object
+//   } = req.body;
+
+//   // Ensure the required fields are provided
+//   if (!link) {
+//     return res.status(400).json({
+//       error: "Missing required field: link is required."
+//     });
+//   }
+//   if (!companyName || !activityName || !employeeName) {
+//     return res.status(400).json({
+//       error: "Missing activity data"
+//     });
+//   }
+
+//   try {
+//     // Check if the link already exists
+//     const existingLink = await prisma.link.findUnique({
+//       where: { link: link }
+//     });
+
+//     if (existingLink) {
+//       // If the link exists, fetch and modify recievers
+//       let recievers = existingLink.recievers || {};
+
+//       // Check if the employeeName exists
+//       if (!recievers[employeeName]) {
+//         // If employee doesn't exist, create new structure for the employee
+//         recievers[employeeName] = {
+//           [companyName]: [activityName] // Add company and activityName
+//         };
+//       } else {
+//         // Employee exists, check if the companyName exists
+//         if (!recievers[employeeName][companyName]) {
+//           // Company doesn't exist, create the company and add the activityName
+//           recievers[employeeName][companyName] = [activityName];
+//         } else {
+//           // Company exists, check if the activityName exists
+//           if (!recievers[employeeName][companyName].includes(activityName)) {
+//             // Add the activityName to the company's activity list
+//             recievers[employeeName][companyName].push(activityName);
+//           }
+//           //  else {
+//           //   return res.status(200).json({
+//           //     message: `Activity '${activityName}' already exists for employee '${employeeName}' under company '${companyName}'`
+//           //   });
+//           // }
+//         }
+//       }
+
+//       // Update the link's recievers and other data
+//       const updatedData = { ...existingLink.data, ...data }; // Merge the new data into the existing data
+//       const updatedLink = await prisma.link.update({
+//         where: { link: link },
+//         data: {
+//           recievers: recievers,
+//           data: updatedData // Update the data as well
+//         }
+//       });
+
+//       return res.status(200).json({
+//         message: "Link data and access modified successfully",
+//         link: updatedLink
+//       });
+//     } else {
+//       // If the link does not exist, create a new entry
+//       const newRecievers = {
+//         [employeeName]: {
+//           [companyName]: [activityName]
+//         }
+//       };
+
+//       const newLink = await prisma.link.create({
+//         data: {
+//           link,
+//           owner,
+//           recievers: newRecievers,
+//           data: data || {} // Optional data, defaults to an empty object if not provided
+//         }
+//       });
+
+//       return res.status(201).json({
+//         message: "Link created successfully",
+//         link: newLink
+//       });
+//     }
+//   } catch (error) {
+//     console.error("Error creating/updating link:", error);
+//     return res.status(500).json({
+//       error: "An error occurred while creating/updating the link."
+//     });
+//   }
+// });
+
 router.post("/", async (req, res) => {
   const {
-    link, // Link URL (should be unique)
+    link,
     owner,
     companyName,
-    activityName,
+    activityName, // selectedGroups from frontend
     employeeName,
-    data // The incoming data object
+    data
   } = req.body;
 
-  // Ensure the required fields are provided
+  // Ensure required fields are provided
   if (!link) {
     return res.status(400).json({
       error: "Missing required field: link is required."
@@ -33,41 +134,43 @@ router.post("/", async (req, res) => {
     });
 
     if (existingLink) {
-      // If the link exists, fetch and modify recievers
       let recievers = existingLink.recievers || {};
 
-      // Check if the employeeName exists
       if (!recievers[employeeName]) {
-        // If employee doesn't exist, create new structure for the employee
+        // If employee doesn't exist, add the employee with the company and activities
         recievers[employeeName] = {
-          [companyName]: [activityName] // Add company and activityName
+          [companyName]: activityName
         };
       } else {
-        // Employee exists, check if the companyName exists
+        // If employee exists, check the company
         if (!recievers[employeeName][companyName]) {
-          // Company doesn't exist, create the company and add the activityName
-          recievers[employeeName][companyName] = [activityName];
+          // If company doesn't exist for this employee, add the company with the activities
+          recievers[employeeName][companyName] = activityName;
         } else {
-          // Company exists, check if the activityName exists
-          if (!recievers[employeeName][companyName].includes(activityName)) {
-            // Add the activityName to the company's activity list
-            recievers[employeeName][companyName].push(activityName);
-          }
-          //  else {
-          //   return res.status(200).json({
-          //     message: `Activity '${activityName}' already exists for employee '${employeeName}' under company '${companyName}'`
-          //   });
-          // }
+          // Company exists, merge activities
+          const existingActivities = recievers[employeeName][companyName];
+
+          // Ensure no duplicates and flatten the arrays
+          const mergedActivities = [
+            ...existingActivities,
+            ...activityName.filter(
+              (newActivity) =>
+                !existingActivities.some(
+                  (existingActivity) => existingActivity.value === newActivity.value
+                )
+            )
+          ];
+
+          recievers[employeeName][companyName] = mergedActivities;
         }
       }
 
-      // Update the link's recievers and other data
-      const updatedData = { ...existingLink.data, ...data }; // Merge the new data into the existing data
+      // Update the recievers and data in the database
       const updatedLink = await prisma.link.update({
         where: { link: link },
         data: {
           recievers: recievers,
-          data: updatedData // Update the data as well
+          data: { ...existingLink.data, ...data }
         }
       });
 
@@ -76,10 +179,10 @@ router.post("/", async (req, res) => {
         link: updatedLink
       });
     } else {
-      // If the link does not exist, create a new entry
+      // If the link doesn't exist, create a new one
       const newRecievers = {
         [employeeName]: {
-          [companyName]: [activityName]
+          [companyName]: activityName // Store the entire activity object
         }
       };
 
@@ -88,7 +191,7 @@ router.post("/", async (req, res) => {
           link,
           owner,
           recievers: newRecievers,
-          data: data || {} // Optional data, defaults to an empty object if not provided
+          data: data || {}
         }
       });
 
@@ -104,7 +207,6 @@ router.post("/", async (req, res) => {
     });
   }
 });
-
 
 router.post("/modify-access", async (req, res) => {
   const { link, companyName, activityName, employeeName } = req.body;
