@@ -121,11 +121,11 @@ router.post("/", async (req, res) => {
       error: "Missing required field: link is required."
     });
   }
-  if (!companyName || !activityName || !employeeName) {
-    return res.status(400).json({
-      error: "Missing activity data"
-    });
-  }
+  // if (!companyName || !activityName || !employeeName) {
+  //   return res.status(400).json({
+  //     error: "Missing activity data"
+  //   });
+  // }
 
   try {
     // Check if the link already exists
@@ -391,6 +391,38 @@ router.get("/employee-list", async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       error: "An error occurred while fetching the link data"
+    });
+  }
+});
+router.get("/full-employee-list", async (req, res) => {
+  const { link } = req.params;
+  try {
+    if (link) {
+      const linkData = await prisma.link.findUnique({
+        where: { link: link }
+      });
+
+      if (!linkData) {
+        return res.status(404).json({
+          message: "Link not found"
+        });
+      }
+
+      // Assuming 'recievers' is an object with employee names as keys
+      const employeeNames = Object.keys(linkData.recievers);
+
+      return res.status(200).json({
+        employeeNames: employeeNames
+      });
+    } else {
+      return res.status(400).json({
+        message: "Link is required"
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching employee list:", error);
+    return res.status(500).json({
+      error: "An error occurred while fetching the employee list"
     });
   }
 });
