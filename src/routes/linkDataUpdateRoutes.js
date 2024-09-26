@@ -342,7 +342,8 @@ router.get("/access-list", async (req, res) => {
 });
 
 router.get("/employee-list", async (req, res) => {
-  const { link } = req.query; // Use req.query for GET request
+  const { link, selectedActivityName, selectedCompanyName } = req.query; // Use req.query for GET request
+
   try {
     if (link) {
       const linkData = await prisma.link.findUnique({
@@ -355,7 +356,33 @@ router.get("/employee-list", async (req, res) => {
         });
       }
 
-      res.status(200).json(linkData.recievers); // Return recievers field
+      // Initialize an array to store the matched employees
+      const matchedEmployees = [];
+
+      // Iterate over the recievers object
+      const recievers = linkData.recievers;
+      for (const [employeeName, companyData] of Object.entries(recievers)) {
+        // Check if selectedCompanyName exists in the employee's company list
+        if (companyData[selectedCompanyName]) {
+          // Check if selectedActivityName exists in the activity list for this company
+          const activities = companyData[selectedCompanyName];
+          const activityMatch = activities.some(activity => activity.value === selectedActivityName);
+
+          if (activityMatch) {
+            matchedEmployees.push(employeeName); // Add the employee to the result if both conditions match
+          }
+        }
+      }
+
+      if (matchedEmployees.length > 0) {
+        // Return the list of employees who match the company and activity
+        res.status(200).json(matchedEmployees);
+      } else {
+        res.status(404).json({
+          message: "No employees found for the given company and activity"
+        });
+      }
+
     } else {
       res.status(400).json({
         message: "Link is required"
@@ -367,5 +394,6 @@ router.get("/employee-list", async (req, res) => {
     });
   }
 });
+
 
 module.exports = router;
