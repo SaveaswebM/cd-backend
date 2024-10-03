@@ -404,7 +404,7 @@ router.get("/employee-list", async (req, res) => {
   }
 });
 router.get("/full-employee-list", async (req, res) => {
-  const { link } = req.params;
+  const { link } = req.query;
   try {
     if (link) {
       const linkData = await prisma.link.findUnique({
