@@ -135,7 +135,7 @@ router.post("/", async (req, res) => {
 
     if (existingLink) {
       let recievers = existingLink.recievers || {};
-
+      const updatedData = { ...existingLink.data };
       if (!recievers[employeeName]) {
         // If employee doesn't exist, add the employee with the company and activities
         recievers[employeeName] = {
@@ -164,13 +164,22 @@ router.post("/", async (req, res) => {
           recievers[employeeName][companyName] = mergedActivities;
         }
       }
-
+      // Iterate over each key in the new data
+      Object.keys(data).forEach((key) => {
+        if (updatedData.hasOwnProperty(key)) {
+          // If the key exists, update the value
+          updatedData[key] = data[key];
+        } else {
+          // If the key doesn't exist, add the key-value pair
+          updatedData[key] = data[key];
+        }
+      });
       // Update the recievers and data in the database
       const updatedLink = await prisma.link.update({
         where: { link: link },
         data: {
           recievers: recievers,
-          data: { ...existingLink.data, ...data }
+          data: updatedData
         }
       });
 
