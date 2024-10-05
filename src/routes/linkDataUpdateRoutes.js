@@ -223,17 +223,17 @@ router.post("/modify-access", async (req, res) => {
   try {
     if (!link) {
       return res.status(400).json({
-        message: "Link is required"
+        message: "Link is required",
       });
     }
 
     const linkData = await prisma.link.findUnique({
-      where: { link: link }
+      where: { link: link },
     });
 
     if (!linkData) {
       return res.status(404).json({
-        message: "Link not found"
+        message: "Link not found",
       });
     }
 
@@ -242,22 +242,32 @@ router.post("/modify-access", async (req, res) => {
     // Check if employeeName exists
     if (!recievers[employeeName]) {
       return res.status(404).json({
-        message: `Employee ${employeeName} not found`
+        message: `Employee ${employeeName} not found`,
       });
     }
 
     // Check if companyName exists for the employee
     if (!recievers[employeeName][companyName]) {
       // Add companyName with the activityName if it doesn't exist
-      recievers[employeeName][companyName] = [activityName];
+      recievers[employeeName][companyName] = [...activityName];
     } else {
-      // Check if the activityName already exists in the companyName's list
-      if (!recievers[employeeName][companyName].includes(activityName)) {
-        // Add the activityName to the companyName's list
-        recievers[employeeName][companyName].push(activityName);
+      // Check if each activity's label exists in the companyName's list
+      const existingActivities = recievers[employeeName][companyName];
+
+      // Filter out activities that are already in the list (compare by 'label')
+      const newActivities = activityName.filter(
+        (newActivity) =>
+          !existingActivities.some(
+            (existingActivity) => existingActivity.label === newActivity.label
+          )
+      );
+
+      // Add only new activities that don't exist in the list
+      if (newActivities.length > 0) {
+        recievers[employeeName][companyName].push(...newActivities);
       } else {
         return res.status(200).json({
-          message: `Activity ${activityName} already exists for company ${companyName}`
+          message: `All provided activities already exist for company ${companyName}`,
         });
       }
     }
@@ -265,21 +275,21 @@ router.post("/modify-access", async (req, res) => {
     // Update the recievers in the database
     await prisma.link.update({
       where: { link: link },
-      data: { recievers: recievers }
+      data: { recievers: recievers },
     });
 
     res.status(200).json({
       message: "Access modified successfully",
-      updatedRecievers: recievers
+      updatedRecievers: recievers,
     });
-
   } catch (error) {
     console.error("Error modifying access:", error);
     return res.status(500).json({
-      error: "An error occurred while modifying access"
+      error: "An error occurred while modifying access",
     });
   }
 });
+
 
 // Get a Link by 'link' or search by other parameters
 router.get("/", async (req, res) => {
