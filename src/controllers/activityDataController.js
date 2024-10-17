@@ -1,5 +1,5 @@
-// src/controllers/activityDataController.js
-const prisma = require('../../prismaClient'); // Import your Prisma client
+
+const prisma = require('../../prismaClient');
 
 // Get all ActivityData
 exports.getAllActivityData = async (req, res) => {
@@ -31,7 +31,7 @@ exports.createActivityData = async (req, res) => {
             activity: { connect: { id: activityId } },
         };
         if (month) {
-            data.month
+            data.month = month
         }
         // Add quarterlyType only if quarterlyTypeId is provided
         if (quarterlyTypeId) {
@@ -71,17 +71,29 @@ exports.getActivityDataById = async (req, res) => {
 // Update ActivityData by ID
 exports.updateActivityData = async (req, res) => {
     try {
-        const { name, type, yearId, month, activityId } = req.body;
+        const { taskName, type, yearId, month, activityId } = req.body;
+
+        const data = {};
+
+        if (taskName != undefined) {
+            data.taskName = taskName;
+        }
+        if (type != undefined) {
+            data.type = type;
+        }
+        if (yearId != undefined) {
+            data.year = { connect: { id: yearId } };
+        }
+        if (month != undefined) {
+            data.month = month;
+        }
+        if (activityId != undefined) {
+            data.activity = { connect: { id: activityId } };
+        }
         const updatedActivityData = await prisma.activityData.update({
             where: { id: parseInt(req.params.id) },
-            data: {
-                name,
-                type,
-                year: { connect: { id: yearId } },
-                month,
-                activity: { connect: { id: activityId } },
-            },
-        });
+            data,
+        })
         res.json(updatedActivityData);
     } catch (error) {
         res.status(500).json({ error: error.message });
