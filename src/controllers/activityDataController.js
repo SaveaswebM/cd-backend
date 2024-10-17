@@ -88,7 +88,7 @@ exports.updateActivityData = async (req, res) => {
             data.month = month;
         }
         if (dueDate != undefined) {
-            data.dueDate = taskName;
+            data.dueDate = dueDate;
         }
         if (activityId != undefined) {
             data.activity = { connect: { id: activityId } };
