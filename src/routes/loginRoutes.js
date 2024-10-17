@@ -33,7 +33,7 @@ router.post('/', async (req, res) => {
 
         // Generate JWT token
         const token = jwt.sign({ userId: user.id }, 'your_jwt_secret', {
-            expiresIn: '1h',
+
         });
 
         res.json({
@@ -49,5 +49,47 @@ router.post('/', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+router.post('/dashboard', async (req, res) => {
+    const { email, password } = req.body;
 
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    try {
+        // Find user by username
+        const user = await prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Compare passwords
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        if (user.userType != "Superadmin") {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        // Generate JWT token
+        const token = jwt.sign({ userId: user.id }, 'your_jwt_secret', {
+
+        });
+
+        res.json({
+            success: true, token, user: {
+                name: user.name,
+                email: user.email,
+                userType: user.userType
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 module.exports = router;
