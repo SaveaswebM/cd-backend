@@ -71,12 +71,12 @@ exports.getActivityDataById = async (req, res) => {
 // Update ActivityData by ID
 exports.updateActivityData = async (req, res) => {
     try {
-        const { taskName, type, yearId, month, activityId } = req.body;
+        const { taskName, type, dueDate, yearId, month, activityId } = req.body;
 
         const data = {};
 
         if (taskName != undefined) {
-            data.taskName = taskName;
+            data.taskName = dueDate;
         }
         if (type != undefined) {
             data.type = type;
@@ -86,6 +86,9 @@ exports.updateActivityData = async (req, res) => {
         }
         if (month != undefined) {
             data.month = month;
+        }
+        if (dueDate != undefined) {
+            data.dueDate = taskName;
         }
         if (activityId != undefined) {
             data.activity = { connect: { id: activityId } };
