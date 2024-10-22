@@ -1,5 +1,7 @@
 // src/index.js
 const express = require("express");
+const Razorpay = require('razorpay');
+
 const cors = require("cors");
 const app = express();
 // const userRoutes = require('./routes/userRoutes');
@@ -36,7 +38,25 @@ app.use("/api/verify-otp", otpVerificationRoutes);
 app.use("/api/verify-password", passwordVerificationRoutes);
 app.use("/api/link-data", linkDataUpdateRoutes);
 
+const razorpay = new Razorpay({
+  key_id: 'rzp_test_vCQDlKcu1PydlH',
+  key_secret: 'ZGSmGmCjayjHig0zx7LGqZFy',
+});
 
+
+app.post('api/createOrder', async (req, res) => {
+  const options = {
+    amount: 50000, // amount in the smallest currency unit (e.g., paise for INR)
+    currency: 'INR',
+    receipt: 'receipt_order_1',
+  };
+  try {
+    const order = await razorpay.orders.create(options);
+    res.json(order);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
 app.get("/api/data", async (req, res) => {
   try {
     const activityData = await prisma.activityData.findMany({
