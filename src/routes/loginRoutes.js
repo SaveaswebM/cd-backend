@@ -94,8 +94,8 @@ router.post('/dashboard', async (req, res) => {
 });
 
 router.delete("/", async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const { email } = req.body;
+    if (!email) {
         return res.status(400).json({ error: 'Email and password are required' });
     }
     try {
@@ -106,12 +106,8 @@ router.delete("/", async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        // Compare passwords
-        const isMatch = await bcrypt.compare(password, user.password);
 
-        if (!isMatch) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
+
         // Delete the user
         await prisma.user.delete({
             where: { email },
