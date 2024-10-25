@@ -44,17 +44,21 @@ const razorpay = new Razorpay({
 });
 
 
-app.post('api/createOrder', async (req, res) => {
+
+app.post('/create-subscription', async (req, res) => {
+  const { plan_id } = req.body; // Plan ID from Razorpay dashboard
+
   const options = {
-    amount: 50000, // amount in the smallest currency unit (e.g., paise for INR)
-    currency: 'INR',
-    receipt: 'receipt_order_1',
+    plan_id: plan_id,
+    customer_notify: 1, // Notify the customer about the subscription
+    total_count: 12, // Total payments in the subscription
   };
+
   try {
-    const order = await razorpay.orders.create(options);
-    res.json(order);
+    const subscription = await razorpay.subscriptions.create(options);
+    res.json(subscription);
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500).json({ error: error.message });
   }
 });
 app.get("/api/data", async (req, res) => {
