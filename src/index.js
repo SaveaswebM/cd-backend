@@ -18,6 +18,11 @@ const otpRoutes = require('./routes/otpRoutes'); // Include OTP routes
 const otpVerificationRoutes = require("./routes/otpVerificationRoutes");
 const passwordVerificationRoutes = require("./routes/passwordVerificationRoutes");
 const linkDataUpdateRoutes = require("./routes/linkDataUpdateRoutes");
+// razorpay
+const customerRoutes = require('./routes/customer');
+const subscriptionRoutes = require('./routes/subscription');
+const webhookRoutes = require('./routes/webhook');
+const updateSubscriptionRoutes = require('./routes/updateSubscription');
 
 app.use(express.json()); // For parsing application/json
 
@@ -37,6 +42,11 @@ app.use('/api/otp', otpRoutes); // Use OTP routes
 app.use("/api/verify-otp", otpVerificationRoutes);
 app.use("/api/verify-password", passwordVerificationRoutes);
 app.use("/api/link-data", linkDataUpdateRoutes);
+app.use('/api', customerRoutes);
+app.use('/api', subscriptionRoutes);
+app.use('/api', webhookRoutes);
+app.use('/api', updateSubscriptionRoutes);
+
 
 const razorpay = new Razorpay({
   key_id: 'rzp_test_vCQDlKcu1PydlH',
