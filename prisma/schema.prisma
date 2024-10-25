@@ -100,17 +100,36 @@ model User {
   password           String?
   userType           UserType
   subscriptionType   SubscriptionType
-  subscriptionStartDate DateTime?
-  subscriptionEndtDate DateTime?
-  subscriptionAmount Int?
-    subscriptionStatus     String?
-  autoRenewal             Boolean          @default(true) 
   lastPaymentDate         DateTime?     
   cancellationReason      String?     
  tableDataId            Int?             // Add this field to refer to a specific TableData entry
   tableData              TableData?       @relation(fields: [tableDataId], references: [id])
   otp                String?          // OTP field
   otpExpiration      DateTime?        // OTP expiration time
+    subscriptions       Subscription[]
+}
+model Subscription {
+  id                   Int        @id @default(autoincrement())
+  userId               Int        // Reference to User
+  razorpayCustomerId   String     // Razorpay Customer ID
+  planId               String     // ID of the subscription plan
+  startDate            DateTime   @default(now())
+  endDate              DateTime?  // When the subscription expires
+  amount               Int        // Subscription amount
+  status               String     // Active, Inactive, etc.
+  autoRenew            Boolean    @default(true) // Indicates if the subscription is auto-renewable
+  renewalCount         Int        @default(0) // Track the number of renewals
+  user                 User       @relation(fields: [userId], references: [id])
+  payments            Payment[]
+}
+model Payment {
+  id            Int        @id @default(autoincrement())
+  subscriptionId Int       // Reference to the Subscription
+  amount        Int        // Amount paid
+  paymentDate   DateTime   @default(now()) // Date of the payment
+  status        String     // Success, Failed, etc.
+  razorpayPaymentId String? // ID from Razorpay for tracking purposes
+  subscription  Subscription @relation(fields: [subscriptionId], references: [id])
 }
 
 model Link {

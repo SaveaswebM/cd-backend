@@ -59,7 +59,9 @@ app.post('/create-subscription', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.post("/updateSuccessfulPayment", async (req, res) => {
 
+})
 app.get("/api/data", async (req, res) => {
   try {
     const activityData = await prisma.activityData.findMany({
