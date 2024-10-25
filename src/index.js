@@ -42,6 +42,23 @@ const razorpay = new Razorpay({
   key_secret: 'ZGSmGmCjayjHig0zx7LGqZFy',
 });
 
+app.post('/create-subscription', async (req, res) => {
+  const { plan_id } = req.body; // Plan ID from Razorpay dashboard
+
+  const options = {
+    plan_id: plan_id,
+    customer_notify: 1, // Notify the customer about the subscription
+    total_count: 12, // Total payments in the subscription
+  };
+
+  try {
+    const subscription = await razorpay.subscriptions.create(options);
+    res.json(subscription);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.post('api/createOrder', async (req, res) => {
   const options = {

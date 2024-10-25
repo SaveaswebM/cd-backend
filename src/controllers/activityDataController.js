@@ -76,7 +76,7 @@ exports.updateActivityData = async (req, res) => {
         const data = {};
 
         if (taskName != undefined) {
-            data.taskName = dueDate;
+            data.taskName = taskName;
         }
         if (type != undefined) {
             data.type = type;

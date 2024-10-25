@@ -20,9 +20,10 @@ enum UserType{
 
 enum SubscriptionType{
 Free
-Standard
-Premium
-
+Professional_monthly
+Professional_yearly
+Premium_monthly
+Premium_yearly
 }
 
 enum ActivityType {
@@ -99,10 +100,15 @@ model User {
   password           String?
   userType           UserType
   subscriptionType   SubscriptionType
-  subscriptionAmount Int
+  subscriptionStartDate DateTime?
+  subscriptionEndtDate DateTime?
+  subscriptionAmount Int?
+    subscriptionStatus     String?
+  autoRenewal             Boolean          @default(true) 
+  lastPaymentDate         DateTime?     
+  cancellationReason      String?     
  tableDataId            Int?             // Add this field to refer to a specific TableData entry
   tableData              TableData?       @relation(fields: [tableDataId], references: [id])
- 
   otp                String?          // OTP field
   otpExpiration      DateTime?        // OTP expiration time
 }

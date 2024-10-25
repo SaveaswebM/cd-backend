@@ -92,4 +92,35 @@ router.post('/dashboard', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+router.delete("/", async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ error: 'Email and password are required' });
+    }
+    try {
+        const user = await prisma.user.findUnique({
+            where: { email },
+        });
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+
+
+        // Delete the user
+        await prisma.user.delete({
+            where: { email },
+        });
+
+        return res.status(200).json({ success: "Account deleted successfully" });
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+
+});
 module.exports = router;
