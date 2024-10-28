@@ -4,9 +4,9 @@ const router = express.Router();
 const Razorpay = require('razorpay');
 
 const razorpay = new Razorpay({
-    key_id: process.env.KEY_TEST_ID,
-    key_secret: process.env.KEY_TEST_SECRET,
-});
+    key_id: 'rzp_test_vCQDlKcu1PydlH',
+    key_secret: 'ZGSmGmCjayjHig0zx7LGqZFy',
+  });
 
 // Create Subscription API
 router.post('/create-subscription', async (req, res) => {
