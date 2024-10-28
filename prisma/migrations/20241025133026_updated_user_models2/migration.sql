@@ -39,7 +39,6 @@ CREATE TABLE "Payment" (
     "paymentDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "status" TEXT NOT NULL,
     "razorpayPaymentId" TEXT,
-
     CONSTRAINT "Payment_pkey" PRIMARY KEY ("id")
 );
 

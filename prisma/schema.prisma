@@ -139,3 +139,13 @@ model Link {
  recievers       Json?
   data           Json
 }
+
+
+model Ad {
+  id         Int      @id @default(autoincrement())
+  contentUrl String   // URL for the image or video
+  startDate  DateTime // Ad start date
+  endDate    DateTime // Ad end date
+  createdAt  DateTime @default(now()) // Timestamp for when the ad was created
+  updatedAt  DateTime @updatedAt      // Auto-updated timestamp for changes
+}
