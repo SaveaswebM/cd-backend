@@ -483,6 +483,10 @@ router.post("/delete-company", async (req, res) => {
 
 
       });
+      await prisma.link.update({
+        where: { link: link },
+        data: { data: personData }
+      });
       return res.status(200).json({ message: "Company data deleted successfully" });
 
 
