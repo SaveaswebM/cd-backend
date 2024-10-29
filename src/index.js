@@ -48,16 +48,16 @@ app.use("/api", webhookRoutes);
 app.use("/api", updateSubscriptionRoutes);
 
 const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, "uploads/"); // Uploads directory
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
   },
-  filename: function(req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname); // Unique filename
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
   }
 });
 const upload = multer({ storage: storage });
 
-app.use("/uploads", express.static("uploads")); // Make uploads directory publicly accessible
+app.use("/uploads", express.static("uploads"));
 app.post("/api/ad/upload", upload.single("image"), async (req, res) => {
   try {
     const { startDate, endDate } = req.body;
@@ -124,7 +124,7 @@ app.post("/create-subscription", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.post("/updateSuccessfulPayment", async (req, res) => {});
+app.post("/updateSuccessfulPayment", async (req, res) => { });
 app.get("/api/data", async (req, res) => {
   try {
     const activityData = await prisma.activityData.findMany({
@@ -166,17 +166,10 @@ app.get("/api/data", async (req, res) => {
           result.Quarterly[name] = {};
         }
         if (!result.Quarterly[name][year]) {
-          result.Quarterly[name][year] = {};
+          result.Quarterly[name][year] = [];
         }
-        const quarter =
-          data.quarterlyType.startMonth + "-" + data.quarterlyType.endMonth;
-        if (!result.Quarterly[name][year][quarter]) {
-          result.Quarterly[name][year][quarter] = [];
-        }
-        result.Quarterly[name][year][quarter].push({
-          name: data.taskName,
-          dueDate
-        });
+        result.Quarterly[name][year].push({ name: data.taskName, dueDate });
+
       } else if (data.type === "Yearly") {
         if (!result.Yearly[name]) {
           result.Yearly[name] = {};

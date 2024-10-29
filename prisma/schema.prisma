@@ -99,6 +99,7 @@ model User {
   email              String           @unique
   password           String?
   userType           UserType
+  link               String?
   subscriptionType   SubscriptionType
   lastPaymentDate         DateTime?     
   cancellationReason      String?     
@@ -106,7 +107,7 @@ model User {
   tableData              TableData?       @relation(fields: [tableDataId], references: [id])
   otp                String?          // OTP field
   otpExpiration      DateTime?        // OTP expiration time
-    subscriptions       Subscription[]
+  subscriptions       Subscription[]
 }
 model Subscription {
   id                   Int        @id @default(autoincrement())
