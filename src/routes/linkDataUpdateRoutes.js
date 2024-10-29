@@ -447,4 +447,57 @@ router.get("/full-employee-list", async (req, res) => {
 });
 
 
+router.post("/delete-company", async (req, res) => {
+  const { companyName } = req.body;
+  const { link } = req.query;
+  try {
+
+    if (link) {
+      const linkData = await prisma.link.findUnique({
+        where: { link: link }
+      });
+      if (!linkData) {
+        return res.status(404).json({
+          message: "Link not found"
+        });
+      }
+
+      const employeeNames = (linkData.recievers);
+      Object.keys(employeeNames).forEach(person => {
+        if (employeeNames[person][companyName]) {
+          delete employeeNames[person][companyName];
+        }
+      })
+      await prisma.link.update({
+        where: { link: link },
+        data: { recievers: employeeNames }
+      });
+
+      const personData = linkData.data;
+      Object.keys(personData).forEach(key => {
+        // Check if the key starts with the companyName
+        if (key.startsWith(companyName)) {
+          // Delete the key from this person's data
+          delete personData[key];
+        }
+
+
+      });
+      return res.status(200).json({ message: "Company data deleted successfully" });
+
+
+    } else {
+      return res.status(400).json({ message: "Link parameter is missing" });
+
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "An error occurred while fetching the company list"
+    });
+  }
+
+}
+
+)
+
 module.exports = router;
