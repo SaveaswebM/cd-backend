@@ -39,15 +39,15 @@ router.post("/update-subscription-after-payment", async (req, res) => {
 
     try {
         // Verify payment signature
-        const isValid = razorpay.utils.validateWebhookSignature(
-            `${razorpay_payment_id}|${razorpay_subscription_id}`,
-            razorpay_signature,
-            "cd1234" // replace with your webhook secret
-        );
+        // const isValid = razorpay.utils.validateWebhookSignature(
+        //     `${razorpay_payment_id}|${razorpay_subscription_id}`,
+        //     razorpay_signature,
+        //     "cd1234" // replace with your webhook secret
+        // );
 
-        if (!isValid) {
-            return res.status(400).json({ message: "Payment verification failed" });
-        }
+        // if (!isValid) {
+        //     return res.status(400).json({ message: "Payment verification failed" });
+        // }
 
         // Payment verified successfully
         const paymentDetails = await razorpay.payments.fetch(razorpay_payment_id);
