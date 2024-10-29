@@ -103,7 +103,7 @@ model User {
   subscriptionType   SubscriptionType
   lastPaymentDate         DateTime?     
   cancellationReason      String?     
- tableDataId            Int?             // Add this field to refer to a specific TableData entry
+  tableDataId            Int?             // Add this field to refer to a specific TableData entry
   tableData              TableData?       @relation(fields: [tableDataId], references: [id])
   otp                String?          // OTP field
   otpExpiration      DateTime?        // OTP expiration time
