@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Razorpay = require('razorpay');
-
+const prisma = require('../../prismaClient');
 const razorpay = new Razorpay({
     key_id: 'rzp_test_vCQDlKcu1PydlH',
     key_secret: 'ZGSmGmCjayjHig0zx7LGqZFy',
@@ -39,7 +39,7 @@ router.post("/update-subscription-after-payment", async (req, res) => {
 
     try {
         // Verify payment signature
-        const isValid = razorpayInstance.utils.validateWebhookSignature(
+        const isValid = razorpay.utils.validateWebhookSignature(
             `${razorpay_payment_id}|${razorpay_subscription_id}`,
             razorpay_signature,
             "cd1234" // replace with your webhook secret
@@ -50,7 +50,7 @@ router.post("/update-subscription-after-payment", async (req, res) => {
         }
 
         // Payment verified successfully
-        const paymentDetails = await razorpayInstance.payments.fetch(razorpay_payment_id);
+        const paymentDetails = await razorpay.payments.fetch(razorpay_payment_id);
 
         if (paymentDetails.status !== "captured") {
             return res.status(400).json({ message: "Payment not captured" });
