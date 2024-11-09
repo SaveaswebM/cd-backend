@@ -18,7 +18,13 @@ router.post('/create-subscription', async (req, res) => {
             // customer_id,
             total_count: 12, // Number of months for the subscription
             current_start: Math.floor(Date.now() / 1000), // Subscription starts immediately
-
+            customer: {
+                email: email,
+            },
+            notify: {
+                email: true,
+                sms: false,
+            },
             notify_info: {
 
                 notify_email: email
