@@ -10,7 +10,7 @@ const razorpay = new Razorpay({
 
 // Create Subscription API
 router.post('/create-subscription', async (req, res) => {
-    const { plan_id, customer_id } = req.body;
+    const { plan_id, customer_id, email } = req.body;
 
     try {
         const subscription = await razorpay.subscriptions.create({
@@ -18,8 +18,11 @@ router.post('/create-subscription', async (req, res) => {
             // customer_id,
             total_count: 12, // Number of months for the subscription
             current_start: Math.floor(Date.now() / 1000), // Subscription starts immediately
-            // Add any other parameters as needed
 
+            notify_info: {
+
+                notify_email: email
+            }
         });
         // res.status(201).json(subscription);
         res.status(201).json({ subscriptionId: subscription.id });
