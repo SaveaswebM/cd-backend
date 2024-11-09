@@ -20,7 +20,7 @@ router.post('/create-subscription', async (req, res) => {
             current_start: Math.floor(Date.now() / 1000), // Subscription starts immediately
             // Add any other parameters as needed
         });
-        res.status(201).json(subscription);
+        // res.status(201).json(subscription);
         res.status(201).json({ subscriptionId: subscription.id });
     } catch (error) {
         console.error(error);
