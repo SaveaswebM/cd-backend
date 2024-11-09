@@ -21,6 +21,7 @@ router.post('/create-subscription', async (req, res) => {
             customer: {
                 email: email,
             },
+            customer_notify: 1,
             notify: {
                 email: true,
                 sms: false,
