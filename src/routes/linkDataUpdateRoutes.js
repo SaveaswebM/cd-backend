@@ -230,7 +230,7 @@ router.post("/modify-access", async (req, res) => {
     const linkData = await prisma.link.findUnique({
       where: { link: link },
     });
-
+    return res.json({ linkData });
     if (!linkData) {
       return res.status(404).json({
         message: "Link not found",
