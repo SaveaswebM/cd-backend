@@ -258,7 +258,7 @@ router.post("/modify-access", async (req, res) => {
       const newActivities = activityName.filter(
         (newActivity) =>
           !existingActivities.some(
-            (existingActivity) => existingActivity.label === newActivity.label
+            (existingActivity) => existingActivity.label === newActivity.label && existingActivity.type === newActivity.type
           )
       );
 
