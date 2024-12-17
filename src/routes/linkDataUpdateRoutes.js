@@ -230,7 +230,7 @@ router.post("/modify-access", async (req, res) => {
     const linkData = await prisma.link.findUnique({
       where: { link: link },
     });
-    return res.json({ linkData });
+
     if (!linkData) {
       return res.status(404).json({
         message: "Link not found",
@@ -238,7 +238,7 @@ router.post("/modify-access", async (req, res) => {
     }
 
     let recievers = linkData.recievers || {};
-
+    // return res.json(recievers[employeeName]);
     // Check if employeeName exists
     if (!recievers[employeeName]) {
       return res.status(404).json({
@@ -266,7 +266,7 @@ router.post("/modify-access", async (req, res) => {
       if (newActivities.length > 0) {
         recievers[employeeName][companyName].push(...newActivities);
       } else {
-        return res.status(200).json({
+        return res.status(401).json({
           message: `All provided activities already exist for company ${companyName}`,
         });
       }
